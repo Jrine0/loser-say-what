@@ -1,0 +1,117 @@
+.goalsPage {
+  max-width: 720px;
+}
+
+.header {
+  margin-bottom: var(--space-9);
+}
+
+.section {
+  margin-bottom: var(--space-8);
+}
+
+.objectiveGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.objectiveCard {
+  padding: var(--space-6);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: inherit;
+  color: inherit;
+}
+
+.objectiveCard:hover {
+  border-color: rgba(192, 57, 43, 0.4);
+}
+
+.objectiveCardSelected {
+  border-color: var(--color-primary);
+  background: rgba(192, 57, 43, 0.06);
+  box-shadow: 0 0 20px rgba(192, 57, 43, 0.15);
+}
+
+.objectiveIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(192, 57, 43, 0.1);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+
+.selectedIndicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.inputRow {
+  max-width: 360px;
+}
+
+.currencyInput {
+  position: relative;
+}
+
+.currencySymbol {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-on-surface-muted);
+  z-index: 1;
+}
+
+.durationGrid {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.durationBtn {
+  padding: 12px 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-on-surface);
+  font-family: var(--font-headline);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.durationBtn:hover {
+  border-color: rgba(192, 57, 43, 0.4);
+}
+
+.durationBtnActive {
+  border-color: var(--color-primary);
+  background: rgba(192, 57, 43, 0.12);
+  color: var(--color-primary-soft);
+}
+
+.commitSection {
+  margin-top: var(--space-9);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}

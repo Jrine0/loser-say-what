@@ -1,0 +1,98 @@
+.verdictPage {
+  max-width: 720px;
+}
+
+.header {
+  margin-bottom: var(--space-8);
+}
+
+.uploadZone {
+  border: 2px dashed var(--color-border);
+  background: var(--color-surface);
+  padding: var(--space-11) var(--space-7);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-bottom: var(--space-9);
+  position: relative;
+}
+
+.uploadZone:hover {
+  border-color: var(--color-primary);
+  background: rgba(192, 57, 43, 0.04);
+}
+
+.uploadZoneDragging {
+  border-color: var(--color-primary);
+  background: rgba(192, 57, 43, 0.08);
+  box-shadow: inset 0 0 30px rgba(192, 57, 43, 0.1);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadedFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--space-4);
+  padding: 8px 16px;
+  background: var(--color-surface-container-high);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-headline);
+  font-size: 13px;
+  color: var(--color-primary-soft);
+}
+
+.resultsSection {
+  margin-top: var(--space-4);
+}
+
+.verdictResult {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.verdictCard {
+  padding: var(--space-7);
+  border-left: 4px solid var(--color-primary);
+}
+
+.verdictHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.verdictStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.verdictText {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-on-surface);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.verdictBreakdown {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.breakdownItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.breakdownItem span:last-child {
+  font-size: 15px;
+  color: var(--color-on-surface);
+}

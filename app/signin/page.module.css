@@ -1,0 +1,109 @@
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-void);
+}
+
+.authKanji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-kanji);
+  font-size: 500px;
+  font-weight: 900;
+  color: var(--color-on-surface);
+  opacity: 0.015;
+  user-select: none;
+  pointer-events: none;
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 440px;
+  padding: var(--gutter);
+  animation: fadeInUp 0.6s ease forwards;
+  z-index: 1;
+}
+
+.authCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: var(--space-9) var(--space-8);
+  border-top: 2px solid var(--color-primary);
+}
+
+.authHeader {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.authBrand {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.authTagline {
+  font-family: var(--font-headline);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--color-on-surface-muted);
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.authSubmit {
+  width: 100%;
+  margin-top: var(--space-3);
+  padding: 16px;
+}
+
+.authMeta {
+  text-align: right;
+}
+
+.forgotLink {
+  font-size: 13px;
+  color: var(--color-on-surface-muted);
+}
+
+.forgotLink:hover {
+  color: var(--color-primary-soft);
+}
+
+.authFooter {
+  text-align: center;
+  margin-top: var(--space-7);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.authCopyright {
+  text-align: center;
+  margin-top: var(--space-7);
+  font-family: var(--font-headline);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-on-surface-muted);
+  opacity: 0.6;
+}

@@ -1,0 +1,103 @@
+.roastPage {
+  max-width: 720px;
+}
+
+.header {
+  margin-bottom: var(--space-8);
+}
+
+.roastList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.roastCard {
+  padding: 0;
+  overflow: hidden;
+  animation: slideInLeft 0.5s ease both;
+  position: relative;
+}
+
+.roastCardInner {
+  display: flex;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  align-items: flex-start;
+}
+
+.roastIcon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(192, 57, 43, 0.1);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.roastContent {
+  flex: 1;
+}
+
+.roastBrandRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.roastBrand {
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-on-surface);
+}
+
+.roastAmount {
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary-soft);
+}
+
+.roastText {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-on-surface-muted);
+  line-height: 1.5;
+}
+
+.roastAccent {
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), transparent);
+}
+
+.totalSection {
+  margin-top: var(--space-4);
+}
+
+.totalCard {
+  padding: var(--space-7);
+}
+
+.totalInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalAmount {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary-light);
+  margin-top: var(--space-2);
+}
+
+.totalVerdict {
+  text-align: right;
+}

@@ -1,0 +1,68 @@
+.dashboard {
+  max-width: 960px;
+  margin: 64px auto 0 auto;
+  padding: var(--space-6) var(--gutter);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-8);
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-9);
+}
+
+.overviewCard {
+  padding: var(--space-6);
+}
+
+.overviewValue {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: var(--space-3) 0;
+  letter-spacing: -0.02em;
+}
+
+.overviewChange {
+  font-size: 13px;
+}
+
+.section {
+  margin-bottom: var(--space-9);
+}
+
+.targetList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.targetCard {
+  padding: var(--space-6);
+}
+
+.targetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+}
+
+.targetProgress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.targetAmounts {
+  display: flex;
+  justify-content: space-between;
+}
