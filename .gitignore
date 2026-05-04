@@ -45,3 +45,6 @@ next-env.d.ts
 
 # editor settings
 /.vscode/
+
+# Soroban contract build artifacts
+/soroban-contract/target/

@@ -47,3 +47,15 @@ export function isValidStellarPublicKey(address: string): boolean {
 export function formatXlmAmount(amount: number): string {
   return amount.toFixed(7);
 }
+
+export function getSorobanRpcUrl(): string {
+  const config = getStellarNetworkConfig();
+  return config.network === "public"
+    ? "https://soroban-mainnet.stellar.org"
+    : "https://soroban-testnet.stellar.org";
+}
+
+/** Convert XLM float to stroops (integer, as BigInt). */
+export function xlmToStroops(amountXLM: number): bigint {
+  return BigInt(Math.round(amountXLM * 10_000_000));
+}

@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Asset, BASE_FEE, Horizon, Operation, TransactionBuilder } from "stellar-sdk";
 import {
-  formatXlmAmount,
+  Address,
+  BASE_FEE,
+  Contract,
+  nativeToScVal,
+  SorobanRpc,
+  TransactionBuilder,
+} from "stellar-sdk";
+import {
+  getSorobanRpcUrl,
   getStellarNetworkConfig,
   isValidStellarPublicKey,
+  xlmToStroops,
 } from "@/lib/stellar";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -14,8 +22,8 @@ function getErrorMessage(error: unknown, fallback: string) {
  * POST /api/stake
  * Body: { amountXLM: number, goalId: string, userId: string, userWallet: string }
  *
- * Builds an unsigned Stellar payment from user -> escrow.
- * Returns an unsigned transaction envelope (XDR) for the client to sign.
+ * Builds an unsigned Soroban contract invocation (stake) XDR.
+ * The client signs with Freighter and submits via /api/confirm-stake.
  */
 export async function POST(req: NextRequest) {
   console.log("[API /api/stake] Received stake request");
@@ -45,55 +53,54 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid Stellar source wallet" }, { status: 400 });
     }
 
-    const escrowPublicKey = process.env.NEXT_PUBLIC_STELLAR_ESCROW_PUBLIC_KEY;
-    if (!escrowPublicKey) {
-      console.error("[API /api/stake] NEXT_PUBLIC_STELLAR_ESCROW_PUBLIC_KEY not set");
-      return NextResponse.json(
-        { error: "Escrow wallet not configured" },
-        { status: 500 }
-      );
-    }
-
-    if (!isValidStellarPublicKey(escrowPublicKey)) {
-      return NextResponse.json(
-        { error: "Escrow wallet is not a valid Stellar public key" },
-        { status: 500 }
-      );
+    const contractId = process.env.NEXT_PUBLIC_SOROBAN_CONTRACT_ID;
+    if (!contractId) {
+      console.error("[API /api/stake] NEXT_PUBLIC_SOROBAN_CONTRACT_ID not set");
+      return NextResponse.json({ error: "Contract not configured" }, { status: 500 });
     }
 
     const networkConfig = getStellarNetworkConfig();
-    const server = new Horizon.Server(networkConfig.horizonUrl);
-    const sourceAccount = await server.loadAccount(userWallet);
+    const rpcServer = new SorobanRpc.Server(getSorobanRpcUrl());
+    const sourceAccount = await rpcServer.getAccount(userWallet);
 
+    const contract = new Contract(contractId);
     const transaction = new TransactionBuilder(sourceAccount, {
       fee: BASE_FEE,
       networkPassphrase: networkConfig.networkPassphrase,
     })
       .addOperation(
-        Operation.payment({
-          destination: escrowPublicKey,
-          asset: Asset.native(),
-          amount: formatXlmAmount(amountXLM),
-        })
+        contract.call(
+          "stake",
+          new Address(userWallet).toScVal(),
+          nativeToScVal(goalId, { type: "string" }),
+          nativeToScVal(xlmToStroops(amountXLM), { type: "i128" }),
+        )
       )
       .setTimeout(180)
       .build();
 
-    const transactionXdr = transaction.toXDR();
+    const simResponse = await rpcServer.simulateTransaction(transaction);
+    if ("error" in simResponse) {
+      console.error("[API /api/stake] Simulation failed:", simResponse.error);
+      return NextResponse.json(
+        { error: `Contract simulation failed: ${simResponse.error}` },
+        { status: 500 }
+      );
+    }
 
-    console.log("[API /api/stake] Unsigned XDR built successfully");
+    const preparedTx = SorobanRpc.assembleTransaction(transaction, simResponse).build();
+    const transactionXdr = preparedTx.toXDR();
+
+    console.log("[API /api/stake] Soroban stake XDR built successfully");
 
     return NextResponse.json({
       transactionXdr,
-      network: networkConfig.network,
-      message: `Transfer ${amountXLM} XLM to escrow`,
+      network: networkConfig.networkPassphrase,
+      message: `Stake ${amountXLM} XLM via contract`,
     });
   } catch (error: unknown) {
-    const message = getErrorMessage(error, "Failed to build stake transaction envelope");
+    const message = getErrorMessage(error, "Failed to build stake transaction");
     console.error("[API /api/stake] Error:", message);
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Horizon, TransactionBuilder } from "stellar-sdk";
+import { SorobanRpc, TransactionBuilder } from "stellar-sdk";
 import { saveStake } from "@/lib/stakes-store";
-import { getStellarExplorerTxUrl, getStellarNetworkConfig } from "@/lib/stellar";
+import { getSorobanRpcUrl, getStellarExplorerTxUrl, getStellarNetworkConfig } from "@/lib/stellar";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -30,12 +30,16 @@ export async function POST(req: NextRequest) {
     }
 
     const networkConfig = getStellarNetworkConfig();
-    const server = new Horizon.Server(networkConfig.horizonUrl);
+    const rpcServer = new SorobanRpc.Server(getSorobanRpcUrl());
     const transaction = TransactionBuilder.fromXDR(
       signedXdr,
       networkConfig.networkPassphrase
     );
-    const submitResult = await server.submitTransaction(transaction);
+    const submitResult = await rpcServer.sendTransaction(transaction);
+    if (submitResult.status === "ERROR") {
+      console.error("[API /api/confirm-stake] Submission error:", submitResult.errorResult);
+      return NextResponse.json({ error: "Transaction submission failed" }, { status: 500 });
+    }
     const txHash = submitResult.hash;
 
     console.log("[API /api/confirm-stake] Transaction confirmed:", txHash);

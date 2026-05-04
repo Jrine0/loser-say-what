@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  Asset,
+  Address,
   BASE_FEE,
-  Horizon,
+  Contract,
   Keypair,
-  Operation,
+  nativeToScVal,
+  SorobanRpc,
   TransactionBuilder,
 } from "stellar-sdk";
 import { getStake, updateStakeStatus } from "@/lib/stakes-store";
 import {
-  formatXlmAmount,
+  getSorobanRpcUrl,
   getStellarExplorerTxUrl,
   getStellarNetworkConfig,
-  isValidStellarPublicKey,
 } from "@/lib/stellar";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -62,74 +62,70 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Load escrow keypair
+    // Load admin (escrow) keypair — also the contract admin
     const escrowSecret = process.env.STELLAR_ESCROW_SECRET;
     if (!escrowSecret) {
       console.error("[API /api/release] STELLAR_ESCROW_SECRET not set");
       return NextResponse.json(
-        { error: "Stellar escrow secret not configured" },
+        { error: "Admin key not configured" },
         { status: 500 }
       );
     }
 
-    const escrowKeypair = Keypair.fromSecret(escrowSecret);
-
-    // Determine recipient
-    let recipientPublicKey: string;
-    let newStatus: "returned" | "donated";
-
-    if (pass) {
-      // Return to user
-      recipientPublicKey = stake.userWallet;
-      newStatus = "returned";
-      console.log("[API /api/release] PASS — returning XLM to user:", stake.userWallet);
-    } else {
-      // Donate to charity
-      const charityWallet = process.env.STELLAR_CHARITY_PUBLIC_KEY;
-      if (!charityWallet) {
-        console.error("[API /api/release] STELLAR_CHARITY_PUBLIC_KEY not set");
-        return NextResponse.json(
-          { error: "Charity wallet not configured" },
-          { status: 500 }
-        );
-      }
-      recipientPublicKey = charityWallet;
-      newStatus = "donated";
-      console.log("[API /api/release] FAIL — donating XLM to charity:", charityWallet);
+    const contractId = process.env.NEXT_PUBLIC_SOROBAN_CONTRACT_ID;
+    if (!contractId) {
+      console.error("[API /api/release] NEXT_PUBLIC_SOROBAN_CONTRACT_ID not set");
+      return NextResponse.json({ error: "Contract not configured" }, { status: 500 });
     }
 
-    if (!isValidStellarPublicKey(recipientPublicKey)) {
-      return NextResponse.json({ error: "Recipient wallet is invalid" }, { status: 500 });
-    }
-
+    const adminKeypair = Keypair.fromSecret(escrowSecret);
     const networkConfig = getStellarNetworkConfig();
-    const server = new Horizon.Server(networkConfig.horizonUrl);
-    const sourceAccount = await server.loadAccount(escrowKeypair.publicKey());
+    const rpcServer = new SorobanRpc.Server(getSorobanRpcUrl());
+    const adminAccount = await rpcServer.getAccount(adminKeypair.publicKey());
 
-    const transaction = new TransactionBuilder(sourceAccount, {
+    const newStatus: "returned" | "donated" = pass ? "returned" : "donated";
+    console.log(
+      `[API /api/release] ${pass ? "PASS — returning" : "FAIL — donating"} ${stake.amountXLM} XLM`
+    );
+
+    const contract = new Contract(contractId);
+    const transaction = new TransactionBuilder(adminAccount, {
       fee: BASE_FEE,
       networkPassphrase: networkConfig.networkPassphrase,
     })
       .addOperation(
-        Operation.payment({
-          destination: recipientPublicKey,
-          asset: Asset.native(),
-          amount: formatXlmAmount(stake.amountXLM),
-        })
+        contract.call(
+          "release",
+          nativeToScVal(goalId, { type: "string" }),
+          new Address(stake.userWallet).toScVal(),
+          nativeToScVal(pass, { type: "bool" }),
+        )
       )
       .setTimeout(180)
       .build();
 
-    transaction.sign(escrowKeypair);
+    const simResponse = await rpcServer.simulateTransaction(transaction);
+    if ("error" in simResponse) {
+      console.error("[API /api/release] Simulation failed:", simResponse.error);
+      return NextResponse.json(
+        { error: `Contract simulation failed: ${simResponse.error}` },
+        { status: 500 }
+      );
+    }
 
-    console.log("[API /api/release] Sending release transaction:", stake.amountXLM, "XLM");
+    const preparedTx = SorobanRpc.assembleTransaction(transaction, simResponse).build();
+    preparedTx.sign(adminKeypair);
 
-    const submitResult = await server.submitTransaction(transaction);
+    console.log("[API /api/release] Submitting release transaction");
+    const submitResult = await rpcServer.sendTransaction(preparedTx);
+    if (submitResult.status === "ERROR") {
+      console.error("[API /api/release] Submission error:", submitResult.errorResult);
+      return NextResponse.json({ error: "Transaction submission failed" }, { status: 500 });
+    }
     const txHash = submitResult.hash;
 
-    console.log("[API /api/release] Transaction confirmed:", txHash);
+    console.log("[API /api/release] Transaction submitted:", txHash);
 
-    // Update store
     updateStakeStatus(goalId, userId, newStatus);
 
     const explorerUrl = getStellarExplorerTxUrl(txHash);
